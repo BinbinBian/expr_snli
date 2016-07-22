@@ -4,6 +4,7 @@ import config
 import datetime
 import numpy as np
 import progressbar as pgb
+from tqdm import tqdm
 
 
 def show_stat(ac, cost, context):
@@ -11,13 +12,13 @@ def show_stat(ac, cost, context):
     print(context, 'cost:', cost)
 
 
-def build_probar():
-    wdgts = [pgb.SimpleProgress(), ' ',
-             pgb.Bar(marker='∎', left='|', right='|'), ' ',
-             pgb.Timer(), ' ',
-             pgb.ETA()]
-
-    return wdgts
+# def build_probar():
+#     wdgts = [pgb.SimpleProgress(), ' ',
+#              pgb.Bar(marker='∎', left='|', right='|'), ' ',
+#              pgb.Timer(), ' ',
+#              pgb.ETA()]
+#
+#     return wdgts
 
 
 def wrapper(model_name, model, batch_size=128, max_length=80, benchmark=None):
@@ -58,11 +59,13 @@ def wrapper(model_name, model, batch_size=128, max_length=80, benchmark=None):
         train_cost_list = []
         print('Number of epoch:', i)
 
-        for j, cur_batch_data in enumerate(train_batch_generator.get_epoch(batch_size=batch_size)):
+        for j, cur_batch_data in tqdm(enumerate(train_batch_generator.get_epoch(batch_size=batch_size)),
+                                      total=train_batch_generator.total_num // batch_size):
 
             if j % 100 == 0:
-                pbar = pgb.ProgressBar(widgets=build_probar(), max_value=100)
-                pbar.start()
+                pass
+                # pbar = pgb.ProgressBar(widgets=build_probar(), max_value=100)
+                # pbar.start()
 
             cur_train_batch_dict = model.input_loader.feed_dict_builder(cur_batch_data)
             model.train(feed_dict=cur_train_batch_dict)
@@ -71,9 +74,9 @@ def wrapper(model_name, model, batch_size=128, max_length=80, benchmark=None):
             train_acc_list.append(train_acc)
             train_cost_list.append(train_cost)
 
-            pbar.update(j % 100)
+            # pbar.update(j % 100)
             if j % 100 == 99:
-                pbar.finish()
+                # pbar.finish()
 
                 dev_acc, dev_cost = model.predict(feed_dict=dev_input_dict)
                 show_stat(dev_acc, dev_cost, 'Dev')
@@ -98,7 +101,7 @@ def wrapper(model_name, model, batch_size=128, max_length=80, benchmark=None):
                       '(%d/%d)' % ((j + 1) * batch_size, train_batch_generator.total_num))
                 print('Time consumed:', str(datetime.datetime.now() - start))
 
-        msg = ' - '.join(['epoch:', str(i),
+        msg = ' - '.join(['epo˚ch:', str(i),
                           'best dev acc:', str(best_acc),
                           'least cost', str(less_cost),
                           'avg train acc', str(np.mean(train_acc_list)),
