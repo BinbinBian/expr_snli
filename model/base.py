@@ -6,7 +6,8 @@ def record_info(**kwargs):
 
 
 class BasicSeqModel:
-    def __init__(self, input_, length_, hidden_state_d, name, cell=None, input_keep_rate=1.0, output_keep_rate=1.0):
+    def __init__(self, input_, length_, hidden_state_d, name, cell=None, input_keep_rate=1.0, output_keep_rate=1.0,
+                 init_state=None):
         """
         lstm_step, input_d, hidden_state_d
         :param name:
@@ -29,12 +30,26 @@ class BasicSeqModel:
                 cell_f = tf.nn.rnn_cell.BasicLSTMCell(hidden_state_d, state_is_tuple=True)
                 cell_r = tf.nn.rnn_cell.BasicLSTMCell(hidden_state_d, state_is_tuple=True)
 
+            if not init_state:
+                init_state_f = None
+                init_state_b = None
+            elif len(init_state) > 1:
+                init_state_f = init_state[0]
+                init_state_b = init_state[1]
+            else:
+                init_state_f = init_state[0]
+                init_state_b = init_state[0]
+
+            # print('blala', init_state_f)
+            # print('blala', init_state_b)
+
             with tf.variable_scope('forward'):
                 self.output, self.last_state = tf.nn.dynamic_rnn(
                     cell_f,
                     tf.nn.dropout(self.input, input_keep_rate),
                     dtype=tf.float32,
                     sequence_length=self.length,
+                    initial_state=init_state_f
                 )
                 self.last = tf.nn.dropout(BasicSeqModel.last_relevant(self.output, self.length),
                                           output_keep_rate)
@@ -45,6 +60,7 @@ class BasicSeqModel:
                     tf.nn.dropout(self.reverse_input, input_keep_rate),
                     dtype=tf.float32,
                     sequence_length=self.length,
+                    initial_state=init_state_b
                 )
                 self.reverse_last = tf.nn.dropout(BasicSeqModel.last_relevant(self.reverse_output, self.length),
                                                   output_keep_rate)
