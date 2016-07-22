@@ -60,8 +60,9 @@ def wrapper(model_name, model, batch_size=128, max_length=80, benchmark=None):
 
         for j, cur_batch_data in enumerate(train_batch_generator.get_epoch(batch_size=batch_size)):
 
-            pbar = pgb.ProgressBar(widgets=build_probar(), max_value=100)
-            pbar.start()
+            if j % 100 == 0:
+                pbar = pgb.ProgressBar(widgets=build_probar(), max_value=100)
+                pbar.start()
 
             cur_train_batch_dict = model.input_loader.feed_dict_builder(cur_batch_data)
             model.train(feed_dict=cur_train_batch_dict)
