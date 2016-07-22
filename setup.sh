@@ -6,3 +6,4 @@ export LD_LIBRARY_PATH=$SHARED_ROOT/cudnn-4.0.7/lib64:$LD_LIBRARY_PATH
 # Add current pwd to PYTHONPATH
 export DIR_TMP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PYTHONPATH=$DIR_TMP
+export SYS_NAME=SLURM

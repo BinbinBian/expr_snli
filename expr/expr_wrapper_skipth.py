@@ -4,6 +4,7 @@ import config
 import datetime
 import numpy as np
 import progressbar as pgb
+import os
 
 
 def show_stat(ac, cost, context):
@@ -22,9 +23,14 @@ def build_probar():
 
 def wrapper(model_name, model, batch_size=128, benchmark=None):
 
-    TRAIN_FILE = config.SNLI_TRAIN_FILE
-    TEST_FILE = config.SNLI_TEST_FILE
-    DEV_FILE = config.SNLI_DEV_FILE
+    TRAIN_FILE = config.SNLI_ST_TRAIN_FILE
+    TEST_FILE = config.SNLI_ST_TEST_FILE
+    DEV_FILE = config.SNLI_ST_DEV_FILE
+
+    if 'SYS_NAME' in os.environ and os.environ['SYS_NAME'] == 'SLURM':
+        TRAIN_FILE = config.SNLI_ST_TRAIN_FILE_ON_SLURM
+        TEST_FILE = config.SNLI_ST_TEST_FILE_ON_SLURM
+        DEV_FILE = config.SNLI_ST_DEV_FILE_ON_SLURM
 
     print('Loading data from', TRAIN_FILE)
     dev_batch_generator = SkipthBatchGenerator(DEV_FILE)
@@ -71,10 +77,10 @@ def wrapper(model_name, model, batch_size=128, benchmark=None):
             train_acc_list.append(train_acc)
             train_cost_list.append(train_cost)
 
-            pbar.update(j)
+            pbar.update(j % 100)
             if j % 100 == 99:
                 pbar.finish()
-                print('\n')
+
                 dev_acc, dev_cost = model.predict(feed_dict=dev_input_dict)
                 show_stat(dev_acc, dev_cost, 'Dev')
 

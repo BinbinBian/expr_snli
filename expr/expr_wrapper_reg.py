@@ -74,7 +74,7 @@ def wrapper(model_name, model, batch_size=128, max_length=80, benchmark=None):
             pbar.update(j % 100)
             if j % 100 == 99:
                 pbar.finish()
-                print('\n')
+
                 dev_acc, dev_cost = model.predict(feed_dict=dev_input_dict)
                 show_stat(dev_acc, dev_cost, 'Dev')
 
