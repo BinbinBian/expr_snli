@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     timestamp = '{0:(%Y-%m-%d-%H:%M:%S)}'.format(datetime.now())
 
-    basicLSTM = biLSTM(lstm_step=max_length, embedding=word_embedding, hidden_d=100,
+    basicLSTM = biLSTM(lstm_step=max_length, embedding=word_embedding, hidden_d=300,
                        Time=timestamp, Message=args.message)
 
     basicLSTM.setup(embedding=word_embedding)
