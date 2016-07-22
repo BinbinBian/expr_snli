@@ -1,4 +1,4 @@
-from utils.batch_generators import BatchGeneratorH5
+from utils.batch_generators import SkipthBatchGenerator
 from utils.save_tool import ResultSaver
 import config
 import datetime
@@ -20,16 +20,16 @@ def build_probar():
     return wdgts
 
 
-def wrapper(model_name, model, batch_size=128, max_length=80, benchmark=None):
+def wrapper(model_name, model, batch_size=128, benchmark=None):
 
     TRAIN_FILE = config.SNLI_TRAIN_FILE
     TEST_FILE = config.SNLI_TEST_FILE
     DEV_FILE = config.SNLI_DEV_FILE
 
     print('Loading data from', TRAIN_FILE)
-    dev_batch_generator = BatchGeneratorH5(DEV_FILE, maxlength=max_length)
-    test_batch_generator = BatchGeneratorH5(TEST_FILE, maxlength=max_length)
-    train_batch_generator = BatchGeneratorH5(TRAIN_FILE, maxlength=max_length)
+    dev_batch_generator = SkipthBatchGenerator(DEV_FILE)
+    test_batch_generator = SkipthBatchGenerator(TEST_FILE)
+    train_batch_generator = SkipthBatchGenerator(TRAIN_FILE)
 
     dev_batch_generator.load_data()
     test_batch_generator.load_data()

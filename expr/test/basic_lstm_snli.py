@@ -2,7 +2,7 @@ from datetime import datetime
 from model.snli_seq_model import SnliBasicLSTM
 import config
 from utils.load_embd import load_embedding
-from expr.expr_wrapper import wrapper
+from expr.expr_wrapper_reg import wrapper
 import argparse
 
 if __name__ == '__main__':
