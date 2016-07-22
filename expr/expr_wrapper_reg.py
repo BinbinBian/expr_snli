@@ -101,7 +101,7 @@ def wrapper(model_name, model, batch_size=128, max_length=80, benchmark=None):
                       '(%d/%d)' % ((j + 1) * batch_size, train_batch_generator.total_num))
                 print('Time consumed:', str(datetime.datetime.now() - start))
 
-        msg = ' - '.join(['epo˚ch:', str(i),
+        msg = ' - '.join(['epoch:', str(i),
                           'best dev acc:', str(best_acc),
                           'least cost', str(less_cost),
                           'avg train acc', str(np.mean(train_acc_list)),
