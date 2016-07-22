@@ -22,4 +22,4 @@ if __name__ == '__main__':
                        Time=timestamp, Message=args.message)
 
     basicLSTM.setup(embedding=word_embedding)
-    wrapper(model_name='snli-basicLSTM', model=basicLSTM, max_length=max_length, benchmark=0.70)
+    wrapper(model_name='snli-biLSTM', model=basicLSTM, max_length=max_length, benchmark=0.70)
