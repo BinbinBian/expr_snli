@@ -8,6 +8,26 @@ import logging
 import inspect
 
 
+def build_logger(filename=None, name='reg'):
+    logger = logging.getLogger(name)
+    formatter = logging.Formatter(fmt='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
+
+    if filename:
+        file_handler = logging.FileHandler(filename)
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.INFO)
+        logger.addHandler(file_handler)
+
+    s_handler = logging.StreamHandler()
+    s_handler.setLevel(logging.INFO)
+    s_handler.setFormatter(formatter)
+    logger.addHandler(s_handler)
+
+    logger.setLevel(logging.INFO)
+
+    return logger
+
+
 class ResultSaver:
     def __init__(self, model_name, model=None, savePara=False, sess=None):
         OUT_ROOT = os.path.join(ROOT_DIR, 'runs')
@@ -17,7 +37,12 @@ class ResultSaver:
         self.checkpoint_dir = os.path.abspath(os.path.join(self.saver_root, "checkpoints"))
         self.meta_filename = os.path.abspath(os.path.join(self.saver_root, "meta.json"))
         self.model_src_filename = os.path.abspath(os.path.join(self.saver_root, "model_src.py"))
-        self.log_filename = os.path.abspath(os.path.join(self.saver_root, "log.txt"))
+
+        self.global_logger = None
+        self.epoch_logger = None
+
+        self.log_print = build_logger()
+
         self.savePara = savePara
         self.sess = sess
         self.tf_saver = None
@@ -28,41 +53,35 @@ class ResultSaver:
 
         with open(self.meta_filename, 'w', encoding='utf-8') as meta_f:
             json.dump(obj=self.model.model_info, sort_keys=True, indent=4, fp=meta_f)
-            print("Saved model meta-info to {}".format(self.log_filename))
+            print("Saved model meta-info to {}".format(self.meta_filename))
         with open(self.model_src_filename, 'w', encoding='utf-8') as src_f:
             model_src = inspect.getsource(type(self.model))
             src_f.write(model_src)
             src_f.flush()
 
+        global_filename = os.path.abspath(os.path.join(self.saver_root, "best_log.txt"))
+        epoch_stat_filename = os.path.abspath(os.path.join(self.saver_root, "epoch_stat.txt"))
+        self.global_logger = build_logger(global_filename, 'global')
+        self.epoch_logger = build_logger(epoch_stat_filename, 'epoch')
+
         if self.savePara:
             self.tf_saver = tf.train.Saver(tf.all_variables())
 
-    def logging(self, msg, with_time=True):
-        if with_time:
-            logging.basicConfig(filename=self.log_filename, level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
-            logging.info(msg)
+    def logging_best(self, msg):
+        if self.savePara:
+            ckp_file = self.save_params()
+            self.global_logger(msg + ' - ' + ckp_file)
         else:
-            logging.basicConfig(filename=self.log_filename, level=logging.INFO, format='%(message)s')
-            logging.info(msg)
-        print("Logging stats to {}".format(self.log_filename))
+            self.global_logger.info(msg)
 
     def logging_epoch(self, msg):
-        # logging.basicConfig(filename=self.log_filename, level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
-        logging.info(msg)
-        # self.log_file.write(msg + '\n')
-        # if with_time:
-        #     timestamp = '{0:(%Y-%m-%d-%H:%M:%S)}'.format(datetime.now())
-        #     self.log_file.write(' '.join(['Time:', timestamp, '\n']))
-        #     self.log_file.flush()
-        # print("Saved prediction stats to {}".format(self.log_file))
+        self.epoch_logger.info(msg)
 
-    def save_params(self, info=None, with_time=True):
+    def save_params(self):
         timestamp = str(int(time.time())) + '.ckpt'
         path = self.tf_saver.save(self.model.sess, os.path.join(self.checkpoint_dir, timestamp))
         pathinfo = ' '.join(['Path:', path])
-        self.logging(pathinfo, with_time=False)
-        self.logging(info, with_time=with_time)
-        print("Saved model checkpoint to {}".format(path))
+        return pathinfo
 
     def close(self):
         pass
