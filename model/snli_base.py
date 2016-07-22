@@ -38,7 +38,7 @@ class SnliLoader:
         :param embedding: The embedding ndarray.
         :return:
         """
-        sess.run(self.load_embedding_op, feed_dict={self.embedding: embedding})
+        sess.run(self.load_embedding_op, feed_dict={self.input_embedding: embedding})
 
     def feed_dict_builder(self, data):
         """

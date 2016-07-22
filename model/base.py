@@ -1,6 +1,10 @@
 import tensorflow as tf
 
 
+def record_info(**kwargs):
+    return kwargs
+
+
 class BasicSeqModel:
     def __init__(self, input_, length_, hidden_state_d, name, cell=None, input_keep_rate=1.0, output_keep_rate=1.0):
         """
@@ -21,7 +25,7 @@ class BasicSeqModel:
             elif len(cell) == 1:
                 cell_f = cell[0]
                 cell_r = cell[0]
-            else: # cell is None
+            else:  # cell is None
                 cell_f = tf.nn.rnn_cell.BasicLSTMCell(hidden_state_d, state_is_tuple=True)
                 cell_r = tf.nn.rnn_cell.BasicLSTMCell(hidden_state_d, state_is_tuple=True)
 
